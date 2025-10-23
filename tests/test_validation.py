@@ -100,24 +100,43 @@ class TestValidateAllParameters:
         assert errors["c"] is None
         assert errors["d"] is None
 
-    def test_invalid_b_zero(self) -> None:
-        """Test validation when parameter 'b' is zero (not allowed)."""
-        all_valid, errors = validate_all_parameters("1.0", "0", "3.0", "4.0")
-        assert all_valid is False
-        assert errors["a"] is None
-        assert errors["b"] is not None
-        assert "cannot be zero" in errors["b"]
+    def test_b_can_be_zero_with_nonzero_d(self) -> None:
+        """Test validation when parameter 'b' is zero but d is not (allowed)."""
+        all_valid, errors = validate_all_parameters("1.0", "0", "1.0", "1.0")
+        assert all_valid is True
+        assert errors["b"] is None
 
-    def test_invalid_d_zero(self) -> None:
-        """Test validation when parameter 'd' is zero (not allowed)."""
-        all_valid, errors = validate_all_parameters("1.0", "2.0", "3.0", "0")
+    def test_both_b_and_d_zero_invalid(self) -> None:
+        """Test validation when both 'b' and 'd' are zero (not allowed)."""
+        all_valid, errors = validate_all_parameters("1.0", "0", "0", "0")
         assert all_valid is False
+        assert errors["b"] is not None
         assert errors["d"] is not None
-        assert "cannot be zero" in errors["d"]
+        assert "At least one of b or d must be non-zero" in errors["b"]
+
+    def test_both_a_and_d_zero_invalid(self) -> None:
+        """Test validation when both 'a' and 'd' are zero (constant zero)."""
+        all_valid, errors = validate_all_parameters("0", "1.0", "0", "0")
+        assert all_valid is False
+        assert errors["a"] is not None
+        assert errors["d"] is not None
+        assert "At least one of a or d must be non-zero" in errors["a"]
+
+    def test_d_can_be_zero(self) -> None:
+        """Test validation when parameter 'd' is zero (allowed for pure sine with a≠0)."""
+        all_valid, errors = validate_all_parameters("1.0", "2.0", "3.0", "0")
+        assert all_valid is True
+        assert errors["d"] is None
+
+    def test_a_can_be_zero(self) -> None:
+        """Test validation when parameter 'a' is zero (allowed for pure tangent)."""
+        all_valid, errors = validate_all_parameters("0", "2.0", "3.0", "1.0")
+        assert all_valid is True
+        assert errors["a"] is None
 
     def test_multiple_invalid_parameters(self) -> None:
         """Test validation when multiple parameters are invalid."""
-        all_valid, errors = validate_all_parameters("invalid", "0", "", "xyz")
+        all_valid, errors = validate_all_parameters("invalid", "abc", "", "xyz")
         assert all_valid is False
         assert errors["a"] is not None
         assert errors["b"] is not None

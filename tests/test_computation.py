@@ -39,15 +39,28 @@ class TestComputeFundamentalPeriod:
         period_neg = compute_fundamental_period(b=-2.0, d=1.0)
         assert abs(period_pos - period_neg) < 0.01
 
-    def test_period_with_zero_b_raises(self) -> None:
-        """Test that b=0 raises ValueError."""
-        with pytest.raises(ValueError, match="Parameter b cannot be zero"):
-            compute_fundamental_period(b=0.0, d=1.0)
+    def test_period_with_zero_b_and_nonzero_d(self) -> None:
+        """Test that b=0 with d≠0 returns tangent period."""
+        # T_tan = π/1 = π (sine is constant)
+        period = compute_fundamental_period(b=0.0, d=1.0)
+        assert abs(period - math.pi) < 0.01
 
-    def test_period_with_zero_d_raises(self) -> None:
-        """Test that d=0 raises ValueError."""
-        with pytest.raises(ValueError, match="Parameter d cannot be zero"):
-            compute_fundamental_period(b=1.0, d=0.0)
+    def test_period_with_both_zero_raises(self) -> None:
+        """Test that b=0 and d=0 raises ValueError."""
+        with pytest.raises(ValueError, match="At least one of b or d must be non-zero"):
+            compute_fundamental_period(b=0.0, d=0.0)
+
+    def test_period_with_zero_d_returns_sine_period(self) -> None:
+        """Test that d=0 returns just the sine period (no tangent)."""
+        # T_sin = 2π/1 = 2π (no tangent component)
+        period = compute_fundamental_period(b=1.0, d=0.0)
+        assert abs(period - 2 * math.pi) < 0.01
+
+    def test_period_with_zero_d_and_b_equals_two(self) -> None:
+        """Test that d=0 with b=2 returns π."""
+        # T_sin = 2π/2 = π (no tangent component)
+        period = compute_fundamental_period(b=2.0, d=0.0)
+        assert abs(period - math.pi) < 0.01
 
 
 class TestEvaluateFunction:

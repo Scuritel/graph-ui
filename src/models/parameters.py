@@ -39,19 +39,29 @@ class FunctionParameters:
                     f"Parameter {field_name} must be numeric, got {type(field_value).__name__}"
                 )
 
-        # Validate b and d are non-zero (to avoid division by zero in period calculation)
-        if self.b == 0:
-            raise ValueError("Parameter b cannot be zero (would cause infinite period)")
-        if self.d == 0:
-            raise ValueError("Parameter d cannot be zero (would cause infinite period)")
+        # Validate at least one of b or d is non-zero (need a periodic component)
+        # AND at least one of a or d is non-zero (need a non-trivial function)
+        # Note: c can always be zero
+        # - b=0, d≠0: Pure tangent (or constant + tangent if a≠0)
+        # - b≠0, d=0: Pure sine (requires a≠0)
+        # - b≠0, d≠0: Combined sine + tangent
+        # - b=0, d=0: Invalid (no period defined)
+        # - a=0, d=0: Invalid (constant zero function)
+        if self.b == 0 and self.d == 0:
+            raise ValueError(
+                "At least one of b or d must be non-zero (need a periodic component)"
+            )
+        if self.a == 0 and self.d == 0:
+            raise ValueError(
+                "At least one of a or d must be non-zero (need a non-trivial function)"
+            )
 
     @staticmethod
     def default() -> "FunctionParameters":
         """
-        Return default parameters as specified in requirements.
+        Return default parameters for a pure sine wave.
 
         Returns:
-            FunctionParameters with a=1, b=1, c=0, d=0.1
-            Note: d is set to 0.1 instead of 0 to avoid division by zero.
+            FunctionParameters with a=1, b=1, c=0, d=0 (pure sine wave)
         """
-        return FunctionParameters(a=1.0, b=1.0, c=0.0, d=0.1)
+        return FunctionParameters(a=1.0, b=1.0, c=0.0, d=0.0)

@@ -86,21 +86,50 @@ def validate_all_parameters(
     Validate all four function parameters.
 
     Args:
-        a_str: Input string for parameter a
-        b_str: Input string for parameter b
-        c_str: Input string for parameter c
-        d_str: Input string for parameter d
+        a_str: Input string for parameter a (amplitude, can be zero)
+        b_str: Input string for parameter b (frequency, can be zero if d≠0)
+        c_str: Input string for parameter c (phase, can be zero)
+        d_str: Input string for parameter d (tangent frequency, can be zero if b≠0)
 
     Returns:
         Tuple of (all_valid, error_messages_dict)
         - all_valid: True if all parameters are valid
         - error_messages_dict: Dictionary mapping parameter names to error messages
           (None for valid parameters)
+
+    Note:
+        At least one of b or d must be non-zero to define a period.
+        - b=0, d≠0: Pure tangent function (or constant + tangent if a≠0)
+        - b≠0, d=0: Pure sine function
+        - b≠0, d≠0: Combined sine + tangent
+        - b=0, d=0: Invalid (no periodic component)
     """
     result_a = validate_parameter(a_str, "a", allow_zero=True)
-    result_b = validate_parameter(b_str, "b", allow_zero=False)
+    result_b = validate_parameter(b_str, "b", allow_zero=True)
     result_c = validate_parameter(c_str, "c", allow_zero=True)
-    result_d = validate_parameter(d_str, "d", allow_zero=False)
+    result_d = validate_parameter(d_str, "d", allow_zero=True)
+
+    # Check special invalid cases
+    if result_a.is_valid and result_b.is_valid and result_d.is_valid:
+        # Case 1: Both b and d are zero (no periodic component)
+        if result_b.value == 0 and result_d.value == 0:
+            error_messages = {
+                "a": result_a.error_message,
+                "b": "At least one of b or d must be non-zero",
+                "c": result_c.error_message,
+                "d": "At least one of b or d must be non-zero",
+            }
+            return False, error_messages
+
+        # Case 2: a=0 and d=0 (constant zero function)
+        if result_a.value == 0 and result_d.value == 0:
+            error_messages = {
+                "a": "At least one of a or d must be non-zero",
+                "b": result_b.error_message,
+                "c": result_c.error_message,
+                "d": "At least one of a or d must be non-zero",
+            }
+            return False, error_messages
 
     all_valid = all(
         [result_a.is_valid, result_b.is_valid, result_c.is_valid, result_d.is_valid]

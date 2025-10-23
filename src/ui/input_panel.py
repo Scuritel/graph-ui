@@ -67,10 +67,22 @@ class InputPanel(QWidget):
         form_layout = QFormLayout()
 
         # Create input fields with default values
+        # Default: pure sine wave (a=1, b=1, c=0, d=0)
         self.input_a = QLineEdit("1.0")
+        self.input_a.setToolTip("Amplitude of sine wave (can be 0 for pure tangent)")
+
         self.input_b = QLineEdit("1.0")
+        self.input_b.setToolTip(
+            "Frequency of sine wave (can be 0 for constant sine offset)"
+        )
+
         self.input_c = QLineEdit("0.0")
-        self.input_d = QLineEdit("0.1")
+        self.input_c.setToolTip("Phase shift in radians (can be 0)")
+
+        self.input_d = QLineEdit("0.0")
+        self.input_d.setToolTip(
+            "Frequency of tangent component (can be 0 for pure sine)"
+        )
 
         # Add to form
         form_layout.addRow("a (amplitude):", self.input_a)
@@ -79,6 +91,20 @@ class InputPanel(QWidget):
         form_layout.addRow("d (tan frequency):", self.input_d)
 
         layout.addLayout(form_layout)
+
+        # Add helpful hint
+        hint_label = QLabel(
+            "💡 Tips:\n"
+            "• Pure sine: set d=0\n"
+            "• Pure tangent: set a=0, b=1\n"
+            "• Constant offset: set b=0 (e.g., sin(1) + tan(x): a=1, b=0, c=1, d=1)"
+        )
+        hint_label.setStyleSheet(
+            "color: #0066cc; font-size: 9pt; margin-top: 5px; "
+            "background-color: #e6f2ff; padding: 8px; border-radius: 4px;"
+        )
+        hint_label.setWordWrap(True)
+        layout.addWidget(hint_label)
 
         # Color pickers section
         color_section = QLabel("Colors")

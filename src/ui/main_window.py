@@ -133,12 +133,25 @@ class MainWindow(QMainWindow):
             if status_bar is not None:
                 status_bar.showMessage(equation)
 
-            # Compute viewport for 9 periods
-            viewport = compute_viewport_for_nine_periods(params)
+            # Compute viewport for 9 periods (X-axis only)
+            viewport_initial = compute_viewport_for_nine_periods(params)
 
             # Evaluate function over the viewport range
             curve = evaluate_function(
-                params, x_min=viewport.x_min, x_max=viewport.x_max, num_points=1000
+                params,
+                x_min=viewport_initial.x_min,
+                x_max=viewport_initial.x_max,
+                num_points=1000,
+            )
+
+            # Auto-adjust Y-axis based on actual function values
+            from src.computation import compute_auto_viewport
+
+            viewport = compute_auto_viewport(
+                x_min=viewport_initial.x_min,
+                x_max=viewport_initial.x_max,
+                y_values=curve.y_values,
+                margin_factor=0.1,
             )
 
             # Use current color settings
