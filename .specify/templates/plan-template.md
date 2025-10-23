@@ -31,6 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
+Checks (must be verified and referenced in the plan):
+
+- The feature plan MUST include a short statement demonstrating compliance with the project constitution at `.specify/memory/constitution.md`.
+- Required automated gates for the feature (as applicable): linting, unit tests, integration/contract tests, and lightweight performance or accessibility checks.
+- Any exceptions to constitutional constraints (security, accessibility, performance budgets) MUST be recorded in the plan with an approver and migration/mitigation steps.
+
 [Gates determined based on constitution file]
 
 ## Project Structure

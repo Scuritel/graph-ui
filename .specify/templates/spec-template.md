@@ -113,3 +113,8 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Constitution Compliance (required)
+
+- Each spec MUST include a short paragraph describing how the feature satisfies the relevant principles in `.specify/memory/constitution.md` (Code Quality, Testing Standards, UX Consistency, Performance & Resource Constraints, Observability & Versioning).
+- If the feature cannot fully comply with one or more principles, the spec MUST document the exception, required mitigations, and the approver for the exception.

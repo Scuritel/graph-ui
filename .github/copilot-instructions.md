@@ -1,0 +1,29 @@
+﻿# graph-ui Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-10-23
+
+## Active Technologies
+
+- Python 3.11+ (001-function-graph-plotter)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+cd src; pytest; ruff check .
+
+## Code Style
+
+Python 3.11+: Follow standard conventions
+
+## Recent Changes
+
+- 001-function-graph-plotter: Added Python 3.11+
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
