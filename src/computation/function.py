@@ -49,11 +49,21 @@ def evaluate_function(
     # Combine components
     y_values = sine_component + tan_component
 
-    # Clip extreme values to prevent rendering issues near asymptotes
-    # Tangent function has asymptotes where cos(d*x) ≈ 0
-    # We clip to a reasonable range based on the sine amplitude
-    clip_threshold = max(abs(params.a) * 10, 100)  # At least 10x sine amplitude
-    y_values = np.clip(y_values, -clip_threshold, clip_threshold)
+    # Handle asymptotes by detecting discontinuities
+    # When tangent jumps from +large to -large (or vice versa), insert NaN
+    # This prevents matplotlib from drawing vertical lines
+    if params.d != 0:
+        # Find large jumps in consecutive y-values (indicates asymptote crossing)
+        diff = np.abs(np.diff(y_values))
+        # If the difference is huge (more than 2x the typical range), it's an asymptote
+        threshold = max(abs(params.a) * 20, 50)  # Threshold for detecting jumps
+        asymptote_indices = np.where(diff > threshold)[0]
+
+        # Insert NaN at asymptote locations to break the line
+        # Set both points around the discontinuity to NaN for symmetry
+        for idx in asymptote_indices:
+            y_values[idx] = np.nan
+            y_values[idx + 1] = np.nan
 
     return FunctionCurve(x_values=x_values, y_values=y_values)
 

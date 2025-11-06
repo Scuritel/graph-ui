@@ -89,16 +89,23 @@ def compute_auto_viewport(
     if len(y_values) == 0:
         raise ValueError("Cannot compute viewport for empty y_values")
 
+    # Filter out NaN values (used to mark discontinuities at asymptotes)
+    y_array = np.asarray(y_values)
+    y_valid = y_array[~np.isnan(y_array)]
+
+    if len(y_valid) == 0:
+        raise ValueError("All y_values are NaN, cannot compute viewport")
+
     # Find y range using percentiles to ignore outliers near asymptotes
-    if use_percentiles and len(y_values) > 10:
+    if use_percentiles and len(y_valid) > 10:
         # Use 2nd and 98th percentiles to exclude extreme outliers
         # This gives a much better view for functions with asymptotes
-        y_min_data = float(np.percentile(y_values, 2))
-        y_max_data = float(np.percentile(y_values, 98))
+        y_min_data = float(np.percentile(y_valid, 2))
+        y_max_data = float(np.percentile(y_valid, 98))
     else:
         # Fall back to min/max for small datasets or when disabled
-        y_min_data = float(min(y_values))
-        y_max_data = float(max(y_values))
+        y_min_data = float(np.min(y_valid))
+        y_max_data = float(np.max(y_valid))
 
     # Add margin
     y_range = y_max_data - y_min_data
