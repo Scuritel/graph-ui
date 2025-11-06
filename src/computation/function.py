@@ -49,21 +49,39 @@ def evaluate_function(
     # Combine components
     y_values = sine_component + tan_component
 
-    # Handle asymptotes by detecting discontinuities
-    # When tangent jumps from +large to -large (or vice versa), insert NaN
-    # This prevents matplotlib from drawing vertical lines
+    # Handle tangent discontinuities with high-resolution sampling
+    # Use 10x more points for accurate asymptote detection, then clip to viewport
     if params.d != 0:
-        # Find large jumps in consecutive y-values (indicates asymptote crossing)
-        diff = np.abs(np.diff(y_values))
-        # If the difference is huge (more than 2x the typical range), it's an asymptote
-        threshold = max(abs(params.a) * 20, 50)  # Threshold for detecting jumps
-        asymptote_indices = np.where(diff > threshold)[0]
+        # Calculate with 10x resolution for better asymptote handling
+        high_res_points = num_points * 10
+        x_high_res = np.linspace(x_min, x_max, high_res_points)
 
-        # Insert NaN at asymptote locations to break the line
-        # Set both points around the discontinuity to NaN for symmetry
-        for idx in asymptote_indices:
-            y_values[idx] = np.nan
-            y_values[idx + 1] = np.nan
+        # Evaluate function at high resolution
+        sine_high_res = params.a * np.sin(x_high_res * params.b + params.c)
+        tan_high_res = np.tan(params.d * x_high_res)
+        y_high_res = sine_high_res + tan_high_res
+
+        # Detect discontinuities by finding large jumps in y values
+        diff = np.abs(np.diff(y_high_res))
+        # Use adaptive threshold based on normal function variation
+        normal_jump = float(np.percentile(diff[np.isfinite(diff)], 95))
+        threshold = max(normal_jump * 5, 50)
+
+        # Find discontinuity points
+        discontinuity_indices = np.nonzero(diff > threshold)[0]
+
+        # Mark discontinuities by setting both sides to NaN
+        for idx in discontinuity_indices:
+            if idx < len(y_high_res) - 1:
+                y_high_res[idx] = np.nan
+                y_high_res[idx + 1] = np.nan
+
+        # Now downsample back to requested resolution
+        # Keep every 10th point to match original num_points
+        step = high_res_points // num_points
+        indices = np.arange(0, high_res_points, step)[:num_points]
+        x_values = x_high_res[indices]
+        y_values = y_high_res[indices]
 
     return FunctionCurve(x_values=x_values, y_values=y_values)
 
